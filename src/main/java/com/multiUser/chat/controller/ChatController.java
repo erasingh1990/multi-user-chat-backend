@@ -16,6 +16,7 @@ import java.util.List;
 @RequestMapping("/api/chat")
 public class ChatController {
 
+
     @Autowired
     private MessageService service;
 
