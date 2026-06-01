@@ -26,6 +26,7 @@ public class ChatController {
     @Autowired
     private ChatService chatService;
 
+
     @MessageMapping("/send")
     public void sendMessage(ChatRequest request,
                             Principal principal) {
