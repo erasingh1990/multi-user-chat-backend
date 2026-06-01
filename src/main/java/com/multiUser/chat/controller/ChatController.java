@@ -19,7 +19,6 @@ public class ChatController {
     @Autowired
     private MessageService service;
 
-
     @Autowired
     private UserService userService;
 
