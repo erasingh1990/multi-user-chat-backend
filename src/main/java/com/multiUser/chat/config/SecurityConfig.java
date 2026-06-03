@@ -24,13 +24,11 @@ public class SecurityConfig {
     private final JWTAuthFilter jwtAuthFilter;
     private final CustomUserDetailService customUserDetailsService;
 
-    // ✅ 1. Password Encoder
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    // ✅ 2. Authentication Provider
     @Bean
     public AuthenticationProvider authenticationProvider() {
 
@@ -41,26 +39,24 @@ public class SecurityConfig {
         return authProvider;
     }
 
-    // ✅ 3. Authentication Manager
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config)
             throws Exception {
         return config.getAuthenticationManager();
     }
 
-    // ✅ 4. Security Filter Chain
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
-                .csrf(csrf->csrf.disable())
+                .csrf(csrf -> csrf.disable())
+                .cors(cors -> cors.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**", "/ws/**","/api/**").permitAll()
+                        .requestMatchers("/auth/**", "/ws/**", "/api/**").permitAll()
                         .anyRequest().authenticated()
                 )
-                .authenticationProvider(authenticationProvider()) // 🔥 IMPORTANT
+                .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
-
         return http.build();
     }
 }
