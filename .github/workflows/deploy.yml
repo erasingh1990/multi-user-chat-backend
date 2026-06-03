@@ -1,0 +1,47 @@
+name: Deploy Backend to AWS Lightsail
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout GitHub repository
+        uses: actions/checkout@v4
+
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.LIGHTSAIL_SSH_KEY }}" > ~/.ssh/lightsail_key
+          chmod 600 ~/.ssh/lightsail_key
+          ssh-keyscan -H ${{ secrets.LIGHTSAIL_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy on Lightsail
+        run: |
+          ssh -i ~/.ssh/lightsail_key ${{ secrets.LIGHTSAIL_USER }}@${{ secrets.LIGHTSAIL_HOST }} << 'EOF'
+            set -e
+
+            cd /home/ubuntu/multi-user-chat-backend
+
+            echo "Pulling latest code..."
+            git pull origin main
+
+            echo "Building backend Docker image..."
+            docker compose -f docker-compose.yaml build app
+
+            echo "Restarting backend container only..."
+            docker compose -f docker-compose.yaml up -d --no-deps app
+
+            echo "Cleaning unused Docker images..."
+            docker image prune -f
+
+            echo "Checking running containers..."
+            docker ps
+
+            echo "Showing backend logs..."
+            docker compose -f docker-compose.yaml logs --tail=80 app
+          EOF
