@@ -1,6 +1,23 @@
 import type { ChatRoom, Message, MessagePage, ReceiptEvent, User } from "../types/chat";
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8082";
+const configuredApiBase = import.meta.env.VITE_API_BASE_URL;
+
+const API_BASE =
+  configuredApiBase && !shouldIgnoreConfiguredApiBase(configuredApiBase)
+    ? configuredApiBase
+    : getDefaultApiBase();
+
+function shouldIgnoreConfiguredApiBase(value: string) {
+  return value.includes("localhost") && !["localhost", "127.0.0.1"].includes(window.location.hostname);
+}
+
+function getDefaultApiBase() {
+  if (["localhost", "127.0.0.1"].includes(window.location.hostname)) {
+    return "http://localhost:8082";
+  }
+
+  return `${window.location.protocol}//${window.location.hostname}:8080`;
+}
 
 export interface LoginResponse {
   token: string;
